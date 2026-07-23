@@ -44,7 +44,12 @@ export default function ProductsPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
-    const selectedFiles = Array.from(e.target.files);
+    let selectedFiles = Array.from(e.target.files);
+    
+    if (selectedFiles.length > 5) {
+      alert("Maximum 5 images allowed per product (Flipkart style). Selecting the first 5 images.");
+      selectedFiles = selectedFiles.slice(0, 5);
+    }
     
     // Check 2MB size limit
     const oversizedFiles = selectedFiles.filter(file => file.size > 2 * 1024 * 1024);
@@ -280,7 +285,7 @@ export default function ProductsPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1">
-                Product Images <span className="text-xs text-gray-500">(Multiple allowed, Max 2MB each)</span>
+                Product Images <span className="text-xs text-indigo-400 font-semibold">(Up to 5 Images like Flipkart, Max 2MB each)</span>
               </label>
               <div className="space-y-3">
                 <label className="flex cursor-pointer bg-[#1a1a1a] border border-[#333] hover:border-indigo-500 border-dashed rounded-lg px-4 py-3 text-center transition-colors">
@@ -288,8 +293,8 @@ export default function ProductsPage() {
                     <Upload className="h-5 w-5" />
                     <span className="text-sm">
                       {imageFiles.length > 0 
-                        ? `${imageFiles.length} new image(s) selected` 
-                        : "Click to select image(s) (Auto 50-100KB compressed)"}
+                        ? `${imageFiles.length} of 5 image(s) selected` 
+                        : "Click to select up to 5 images (Auto 50-100KB compressed)"}
                     </span>
                   </div>
                   <input
@@ -302,22 +307,42 @@ export default function ProductsPage() {
                   />
                 </label>
 
-                {/* Selected File Previews */}
+                {/* Selected File Previews (up to 5 slots) */}
                 {imageFiles.length > 0 ? (
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {imageFiles.map((file, idx) => (
-                      <div key={idx} className="h-14 w-14 rounded-md overflow-hidden bg-[#262626] border border-[#333]">
-                        <img src={URL.createObjectURL(file)} alt="Preview" className="h-full w-full object-cover" />
-                      </div>
-                    ))}
+                  <div className="flex items-center gap-2 pt-1">
+                    {Array.from({ length: 5 }).map((_, idx) => {
+                      const file = imageFiles[idx];
+                      return (
+                        <div key={idx} className="h-14 w-14 rounded-md overflow-hidden bg-[#262626] border border-[#333] flex items-center justify-center relative">
+                          {file ? (
+                            <>
+                              <img src={URL.createObjectURL(file)} alt={`Slot ${idx + 1}`} className="h-full w-full object-cover" />
+                              <span className="absolute bottom-0 right-0 bg-indigo-600 text-white text-[9px] font-bold px-1">{idx + 1}</span>
+                            </>
+                          ) : (
+                            <span className="text-xs text-gray-600 font-medium">#{idx + 1}</span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : existingImages.length > 0 ? (
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {existingImages.map((imgUrl, idx) => (
-                      <div key={idx} className="h-14 w-14 rounded-md overflow-hidden bg-[#262626] border border-[#333]">
-                        <img src={imgUrl} alt="Existing" className="h-full w-full object-cover" />
-                      </div>
-                    ))}
+                  <div className="flex items-center gap-2 pt-1">
+                    {Array.from({ length: 5 }).map((_, idx) => {
+                      const imgUrl = existingImages[idx];
+                      return (
+                        <div key={idx} className="h-14 w-14 rounded-md overflow-hidden bg-[#262626] border border-[#333] flex items-center justify-center relative">
+                          {imgUrl ? (
+                            <>
+                              <img src={imgUrl} alt={`Existing ${idx + 1}`} className="h-full w-full object-cover" />
+                              <span className="absolute bottom-0 right-0 bg-indigo-600 text-white text-[9px] font-bold px-1">{idx + 1}</span>
+                            </>
+                          ) : (
+                            <span className="text-xs text-gray-600 font-medium">#{idx + 1}</span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : null}
               </div>
