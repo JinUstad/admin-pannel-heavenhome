@@ -19,18 +19,26 @@ export default function LoginPage() {
     setError("");
     
     // Attempt real Supabase Auth login
-    const { data, error: authError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: password.trim(),
-    });
+    let authError: any = null;
+    try {
+      if (supabase) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password: password.trim(),
+        });
+        authError = error;
+      }
+    } catch (err) {
+      // Supabase client not available (e.g. env vars missing on Vercel)
+      authError = err;
+    }
 
     setLoading(false);
 
     // Also support the hardcoded one as a fallback just in case it wasn't set up in Supabase properly
-    if (
-      !authError || 
-      (email.trim() === "heavenhome@gmail.com" && (password.trim() === "Heaven@321" || password.trim() === "Heaven@123"))
-    ) {
+    const isHardcodedAdmin = email.trim() === "heavenhome@gmail.com" && (password.trim() === "Heaven@321" || password.trim() === "Heaven@123");
+    
+    if (!authError || isHardcodedAdmin) {
       document.cookie = "admin_auth=true; path=/; max-age=86400";
       localStorage.setItem('admin_email', email.trim());
       router.push("/");
