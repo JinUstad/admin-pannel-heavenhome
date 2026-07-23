@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
-import { Package, Plus, Trash2, Image as ImageIcon, Upload, Edit2, X, Check } from "lucide-react";
+import { Package, Plus, Trash2, Image as ImageIcon, Upload, Edit2, X, Check, Tag } from "lucide-react";
 import imageCompression from "browser-image-compression";
 
 export default function ProductsPage() {
@@ -16,6 +16,8 @@ export default function ProductsPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [oldPrice, setOldPrice] = useState("");
+  const [discount, setDiscount] = useState("");
   const [stock, setStock] = useState("");
   const [categoryId, setCategoryId] = useState("");
 
@@ -70,12 +72,10 @@ export default function ProductsPage() {
     }
 
     if (validFiles.length === 0) {
-      // Reset file input so same file can be picked again
       e.target.value = "";
       return;
     }
 
-    // How many slots left?
     const currentCount = imagePreviews.length;
     const remainingSlots = 5 - currentCount;
 
@@ -90,7 +90,6 @@ export default function ProductsPage() {
       alert(`Only ${remainingSlots} slot(s) available. Added first ${filesToAdd.length} image(s).`);
     }
 
-    // Create preview entries
     const newPreviews = filesToAdd.map(file => ({
       type: "new" as const,
       src: URL.createObjectURL(file),
@@ -98,21 +97,29 @@ export default function ProductsPage() {
     }));
 
     setImagePreviews(prev => [...prev, ...newPreviews]);
-
-    // Reset file input value so the same file can be selected again if needed
     e.target.value = "";
   };
 
-  // Remove an image (existing or new) by index
   const removeImage = (index: number) => {
     setImagePreviews(prev => {
       const item = prev[index];
-      // Revoke object URL if it was a local file preview
       if (item.type === "new" && item.src.startsWith("blob:")) {
         URL.revokeObjectURL(item.src);
       }
       return prev.filter((_, i) => i !== index);
     });
+  };
+
+  // Auto calculate discount percentage when oldPrice or price changes if user hasn't typed custom discount
+  const calculateDiscountBadge = (actualPrice: string, mrpPrice: string, customDisc: string) => {
+    if (customDisc.trim()) return customDisc.trim();
+    const p = parseFloat(actualPrice);
+    const op = parseFloat(mrpPrice);
+    if (op && p && op > p) {
+      const pct = Math.round(((op - p) / op) * 100);
+      return `${pct}% OFF`;
+    }
+    return "";
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
@@ -124,10 +131,8 @@ export default function ProductsPage() {
 
     for (const item of imagePreviews) {
       if (item.type === "existing") {
-        // Already-uploaded URL, keep as is
         finalUrls.push(item.src);
       } else if (item.type === "new" && item.file) {
-        // Compress & upload new file
         try {
           const options = {
             maxSizeMB: 0.08,
@@ -158,18 +163,19 @@ export default function ProductsPage() {
       }
     }
 
-    // If no images at all, use placeholder
     if (finalUrls.length === 0) {
       finalUrls.push("https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80");
     }
 
-    // Store as JSON array string if multiple, or single string for backward compatibility
     const finalImageUrlStr = finalUrls.length === 1 ? finalUrls[0] : JSON.stringify(finalUrls);
+    const finalDiscount = calculateDiscountBadge(price, oldPrice, discount);
 
     const productPayload = {
       title,
       description,
       price: parseFloat(price),
+      old_price: oldPrice ? parseFloat(oldPrice) : null,
+      discount: finalDiscount || null,
       stock: parseInt(stock) || 0,
       category_id: categoryId,
       image_url: finalImageUrlStr
@@ -200,9 +206,10 @@ export default function ProductsPage() {
     setTitle("");
     setDescription("");
     setPrice("");
+    setOldPrice("");
+    setDiscount("");
     setStock("");
     setCategoryId("");
-    // Revoke all blob URLs
     imagePreviews.forEach(item => {
       if (item.type === "new" && item.src.startsWith("blob:")) {
         URL.revokeObjectURL(item.src);
@@ -218,10 +225,11 @@ export default function ProductsPage() {
     setTitle(product.title || "");
     setDescription(product.description || "");
     setPrice(product.price ? product.price.toString() : "");
+    setOldPrice(product.old_price ? product.old_price.toString() : "");
+    setDiscount(product.discount || "");
     setStock(product.stock ? product.stock.toString() : "0");
     setCategoryId(product.category_id || "");
 
-    // Parse existing images into previews
     const existingPreviews: { type: "existing" | "new"; src: string }[] = [];
     if (product.image_url) {
       try {
@@ -251,7 +259,6 @@ export default function ProductsPage() {
     }
   };
 
-  // Helper to parse primary image display in table
   const getPrimaryImage = (imageUrlStr?: string) => {
     if (!imageUrlStr) return null;
     try {
@@ -271,7 +278,7 @@ export default function ProductsPage() {
             <Package className="h-8 w-8 text-indigo-400" />
             Products
           </h2>
-          <p className="text-gray-400 mt-2">Manage products, pricing, and multi-image inventory.</p>
+          <p className="text-gray-400 mt-2">Manage products, pricing, discounts, and multi-image inventory.</p>
         </div>
       </div>
 
@@ -300,6 +307,7 @@ export default function ProductsPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500"
+                placeholder="e.g. Stainless Steel Bottle"
                 required
               />
             </div>
@@ -319,16 +327,47 @@ export default function ProductsPage() {
               </select>
             </div>
 
+            {/* Price & Stock Grid */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Price ($)</label>
+                <label className="block text-sm font-medium text-gray-400 mb-1">Selling Price ($)</label>
                 <input
                   type="number"
                   step="0.01"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 font-bold text-green-400"
+                  placeholder="e.g. 2500"
                   required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Original MRP ($) <span className="text-[10px] text-gray-500">(Strikethrough)</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={oldPrice}
+                  onChange={(e) => setOldPrice(e.target.value)}
+                  className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-2 text-gray-400 line-through focus:outline-none focus:border-indigo-500"
+                  placeholder="e.g. 5000"
+                />
+              </div>
+            </div>
+
+            {/* Discount Badge & Stock Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Discount Badge <span className="text-[10px] text-indigo-400">(Auto or Custom)</span>
+                </label>
+                <input
+                  type="text"
+                  value={discount}
+                  onChange={(e) => setDiscount(e.target.value)}
+                  className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-2 text-amber-400 font-medium focus:outline-none focus:border-indigo-500 text-sm"
+                  placeholder={oldPrice && price ? `${calculateDiscountBadge(price, oldPrice, '')}` : "e.g. 50% OFF"}
                 />
               </div>
               <div>
@@ -338,6 +377,7 @@ export default function ProductsPage() {
                   value={stock}
                   onChange={(e) => setStock(e.target.value)}
                   className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500"
+                  placeholder="10"
                 />
               </div>
             </div>
@@ -348,7 +388,6 @@ export default function ProductsPage() {
                 Product Images <span className="text-xs text-indigo-400 font-semibold">(Up to 5 Images, Each &lt; 2MB)</span>
               </label>
               <div className="space-y-3">
-                {/* Upload Button — only show if less than 5 images */}
                 {imagePreviews.length < 5 && (
                   <label className="flex cursor-pointer bg-[#1a1a1a] border border-[#333] hover:border-indigo-500 border-dashed rounded-lg px-4 py-3 text-center transition-colors">
                     <div className="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-indigo-400 w-full">
@@ -389,11 +428,9 @@ export default function ProductsPage() {
                               alt={`Image ${idx + 1}`} 
                               className="h-full w-full object-cover rounded-lg" 
                             />
-                            {/* Slot number badge */}
                             <span className="absolute bottom-0.5 right-0.5 bg-indigo-600/90 text-white text-[9px] font-bold px-1 rounded">
                               #{idx + 1}
                             </span>
-                            {/* Red X remove button — always visible */}
                             <button
                               type="button"
                               onClick={(e) => {
@@ -450,22 +487,25 @@ export default function ProductsPage() {
                 <tr className="bg-[#1a1a1a] border-b border-[#262626]">
                   <th className="px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Product</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Category</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Price</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Price / MRP</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Discount</th>
                   <th className="px-6 py-3 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#262626]">
                 {fetching ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-gray-400">Loading products...</td>
+                    <td colSpan={5} className="px-6 py-8 text-center text-gray-400">Loading products...</td>
                   </tr>
                 ) : products.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-gray-400">No products found.</td>
+                    <td colSpan={5} className="px-6 py-8 text-center text-gray-400">No products found.</td>
                   </tr>
                 ) : (
                   products.map((product) => {
                     const primaryImg = getPrimaryImage(product.image_url);
+                    const discText = product.discount || (product.old_price && product.price < product.old_price ? `${Math.round(((product.old_price - product.price) / product.old_price) * 100)}% OFF` : null);
+
                     return (
                       <tr key={product.id} className={`hover:bg-[#1a1a1a]/50 transition-colors ${editingId === product.id ? 'bg-indigo-500/10' : ''}`}>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -486,8 +526,23 @@ export default function ProductsPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                           {product.categories?.name || "Unknown"}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                          ${parseFloat(product.price).toFixed(2)}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <div className="flex flex-col">
+                            <span className="text-green-400 font-bold">${parseFloat(product.price).toFixed(2)}</span>
+                            {product.old_price && (
+                              <span className="text-xs text-gray-500 line-through">${parseFloat(product.old_price).toFixed(2)}</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          {discText ? (
+                            <span className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded text-xs font-bold">
+                              <Tag className="w-3 h-3" />
+                              {discText}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-600">-</span>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex items-center justify-end gap-2">
