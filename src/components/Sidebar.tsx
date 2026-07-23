@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { 
   LayoutDashboard, 
   Package, 
   Tags, 
   Users, 
-  Archive 
+  Archive,
+  LogOut
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -21,10 +22,19 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   if (pathname === '/login') {
     return null;
   }
+
+  const handleLogout = () => {
+    // Clear the auth cookie
+    document.cookie = "admin_auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    // Redirect to login page
+    router.push('/login');
+    router.refresh(); // Force refresh to ensure layouts re-run
+  };
 
   return (
     <div className="flex flex-col w-64 bg-[#0a0a0a] border-r border-[#262626] h-full text-[#ededed]">
@@ -60,14 +70,23 @@ export function Sidebar() {
         })}
       </nav>
       <div className="p-4 border-t border-[#262626]">
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-sm font-bold text-white">
-            AD
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-sm font-bold text-white">
+              AD
+            </div>
+            <div>
+              <p className="text-sm font-medium text-white">Admin</p>
+              <p className="text-xs text-gray-400">admin@heavenhome.com</p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-medium text-white">Admin</p>
-            <p className="text-xs text-gray-400">admin@heavenhome.com</p>
-          </div>
+          <button 
+            onClick={handleLogout}
+            className="p-2 text-gray-400 hover:text-red-400 hover:bg-[#1a1a1a] rounded-md transition-colors"
+            title="Log out"
+          >
+            <LogOut className="h-5 w-5" />
+          </button>
         </div>
       </div>
     </div>
