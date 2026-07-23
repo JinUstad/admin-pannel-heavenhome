@@ -2,45 +2,77 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Plus, Tags, Trash2 } from "lucide-react";
+import { Plus, Tags, Trash2, Edit2, X, Check } from "lucide-react";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [name, setName] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
   const fetchCategories = async () => {
     setFetching(true);
-    const { data, error } = await supabase.from("categories").select("*").order("created_at", { ascending: false });
-    if (!error && data) {
-      setCategories(data);
+    try {
+      const { data, error } = await supabase.from("categories").select("*").order("created_at", { ascending: false });
+      if (!error && data) {
+        setCategories(data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setFetching(false);
     }
-    setFetching(false);
   };
 
   useEffect(() => {
     fetchCategories();
   }, []);
 
-  const handleAddCategory = async (e: React.FormEvent) => {
+  const handleSaveCategory = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) return;
+    if (!name.trim()) return;
     setLoading(true);
-    const { error } = await supabase.from("categories").insert([{ name }]);
-    setLoading(false);
-    if (!error) {
-      setName("");
-      fetchCategories();
+
+    if (editingId) {
+      // Update existing category
+      const { error } = await supabase.from("categories").update({ name: name.trim() }).eq("id", editingId);
+      setLoading(false);
+      if (!error) {
+        setName("");
+        setEditingId(null);
+        fetchCategories();
+      } else {
+        alert("Error updating category: " + error.message);
+      }
     } else {
-      alert("Error adding category: " + error.message);
+      // Add new category
+      const { error } = await supabase.from("categories").insert([{ name: name.trim() }]);
+      setLoading(false);
+      if (!error) {
+        setName("");
+        fetchCategories();
+      } else {
+        alert("Error adding category: " + error.message);
+      }
     }
+  };
+
+  const handleEdit = (category: any) => {
+    setEditingId(category.id);
+    setName(category.name);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setName("");
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure? This might delete associated products.")) return;
     const { error } = await supabase.from("categories").delete().eq("id", id);
     if (!error) {
+      if (editingId === id) handleCancelEdit();
       fetchCategories();
     } else {
       alert("Error deleting category");
@@ -62,8 +94,21 @@ export default function CategoriesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Form */}
         <div className="bg-[#121212] border border-[#262626] rounded-xl p-6 h-fit">
-          <h3 className="text-lg font-medium text-white mb-4">Add New Category</h3>
-          <form onSubmit={handleAddCategory} className="space-y-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-medium text-white">
+              {editingId ? "Edit Category" : "Add New Category"}
+            </h3>
+            {editingId && (
+              <button 
+                onClick={handleCancelEdit}
+                className="text-xs text-gray-400 hover:text-white flex items-center gap-1 bg-[#1a1a1a] px-2 py-1 rounded border border-[#333]"
+              >
+                <X className="h-3 w-3" /> Cancel
+              </button>
+            )}
+          </div>
+
+          <form onSubmit={handleSaveCategory} className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-400 mb-1">
                 Category Name
@@ -83,7 +128,9 @@ export default function CategoriesPage() {
               disabled={loading}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
             >
-              {loading ? "Adding..." : <><Plus className="h-4 w-4" /> Add Category</>}
+              {loading ? (editingId ? "Saving..." : "Adding...") : (
+                editingId ? <><Check className="h-4 w-4" /> Save Changes</> : <><Plus className="h-4 w-4" /> Add Category</>
+              )}
             </button>
           </form>
         </div>
@@ -113,7 +160,7 @@ export default function CategoriesPage() {
                   </tr>
                 ) : (
                   categories.map((category) => (
-                    <tr key={category.id} className="hover:bg-[#1a1a1a]/50 transition-colors">
+                    <tr key={category.id} className={`hover:bg-[#1a1a1a]/50 transition-colors ${editingId === category.id ? 'bg-indigo-500/10' : ''}`}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                         {category.name}
                       </td>
@@ -121,13 +168,22 @@ export default function CategoriesPage() {
                         {new Date(category.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button 
-                          onClick={() => handleDelete(category.id)}
-                          className="text-red-400 hover:text-red-300 transition-colors p-2 rounded-md hover:bg-red-400/10"
-                          title="Delete Category"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <button 
+                            onClick={() => handleEdit(category)}
+                            className="text-indigo-400 hover:text-indigo-300 transition-colors p-2 rounded-md hover:bg-indigo-400/10"
+                            title="Edit Category"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(category.id)}
+                            className="text-red-400 hover:text-red-300 transition-colors p-2 rounded-md hover:bg-red-400/10"
+                            title="Delete Category"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
