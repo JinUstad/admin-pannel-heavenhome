@@ -32,6 +32,7 @@ export default function LoginPage() {
       (email.trim() === "heavenhome@gmail.com" && (password.trim() === "Heaven@321" || password.trim() === "Heaven@123"))
     ) {
       document.cookie = "admin_auth=true; path=/; max-age=86400";
+      localStorage.setItem('admin_email', email.trim());
       router.push("/");
       router.refresh();
     } else {

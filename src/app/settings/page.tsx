@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Lock, Mail, ShieldCheck, AlertCircle } from "lucide-react";
 
@@ -9,6 +9,20 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [userEmail, setUserEmail] = useState("Loading...");
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (data.user?.email) {
+        setUserEmail(data.user.email);
+      } else {
+        const storedEmail = localStorage.getItem('admin_email');
+        setUserEmail(storedEmail || "admin@heavenhome.com");
+      }
+    };
+    fetchUser();
+  }, []);
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +80,7 @@ export default function SettingsPage() {
                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">Email Address</p>
                 <div className="flex items-center text-sm text-gray-300 bg-[#1a1a1a] p-2.5 rounded-lg border border-[#333]">
                   <Mail className="h-4 w-4 mr-2 text-gray-500" />
-                  admin@heavenhome.com
+                  {userEmail}
                 </div>
               </div>
             </div>
