@@ -44,30 +44,52 @@ export default function ProductsPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
-    let selectedFiles = Array.from(e.target.files);
+    const selectedFiles = Array.from(e.target.files);
     
-    if (selectedFiles.length > 5) {
-      alert("Maximum 5 images allowed per product (Flipkart style). Selecting the first 5 images.");
-      selectedFiles = selectedFiles.slice(0, 5);
+    // Check each individual image file size (must be < 2MB EACH)
+    const validFiles: File[] = [];
+    const rejectedNames: string[] = [];
+
+    selectedFiles.forEach(file => {
+      if (file.size > 2 * 1024 * 1024) { // 2MB limit per file
+        rejectedNames.push(`${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`);
+      } else {
+        validFiles.push(file);
+      }
+    });
+
+    if (rejectedNames.length > 0) {
+      alert(`Skipped file(s) exceeding 2MB limit (each image must be < 2MB):\n\n${rejectedNames.join('\n')}`);
     }
-    
-    // Check 2MB size limit
-    const oversizedFiles = selectedFiles.filter(file => file.size > 2 * 1024 * 1024);
-    if (oversizedFiles.length > 0) {
-      alert(`The following file(s) exceed the 2MB size limit:\n${oversizedFiles.map(f => f.name).join(', ')}\n\nPlease choose images smaller than 2MB.`);
+
+    if (validFiles.length === 0) {
       e.target.value = "";
       return;
     }
-    
-    setImageFiles(selectedFiles);
+
+    // Limit combined images (existing + new) to 5 total
+    const remainingSlots = 5 - existingImages.length - imageFiles.length;
+    if (remainingSlots <= 0) {
+      alert("Maximum 5 images allowed per product. Please remove an image before adding new ones.");
+      e.target.value = "";
+      return;
+    }
+
+    const filesToAdd = validFiles.slice(0, remainingSlots);
+    if (validFiles.length > remainingSlots) {
+      alert(`Only ${remainingSlots} slot(s) available. Added first ${remainingSlots} image(s).`);
+    }
+
+    setImageFiles(prev => [...prev, ...filesToAdd]);
+    e.target.value = "";
   };
 
-  const removeImageFile = (index: number) => {
-    setImageFiles(prev => prev.filter((_, i) => i !== index));
+  const removeImageFile = (fileIndex: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== fileIndex));
   };
 
-  const removeExistingImage = (index: number) => {
-    setExistingImages(prev => prev.filter((_, i) => i !== index));
+  const removeExistingImage = (existingIndex: number) => {
+    setExistingImages(prev => prev.filter((_, i) => i !== existingIndex));
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
@@ -75,9 +97,9 @@ export default function ProductsPage() {
     if (!title || !price || !categoryId) return;
     setLoading(true);
 
-    let uploadedUrls: string[] = [];
+    let newUploadedUrls: string[] = [];
 
-    // Compress & Upload new images if selected
+    // Compress & Upload new image files if selected
     if (imageFiles.length > 0) {
       try {
         const uploadPromises = imageFiles.map(async (file) => {
@@ -105,7 +127,7 @@ export default function ProductsPage() {
           return publicUrl;
         });
 
-        uploadedUrls = await Promise.all(uploadPromises);
+        newUploadedUrls = await Promise.all(uploadPromises);
       } catch (err: any) {
         alert("Error compressing/uploading image(s): " + err.message);
         setLoading(false);
@@ -113,10 +135,11 @@ export default function ProductsPage() {
       }
     }
 
-    // Combine existing and newly uploaded images
-    const allImages = imageFiles.length > 0 
-      ? uploadedUrls 
-      : (existingImages.length > 0 ? existingImages : ["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80"]);
+    // Combine existing images and newly uploaded images (max 5)
+    let allImages = [...existingImages, ...newUploadedUrls].slice(0, 5);
+    if (allImages.length === 0) {
+      allImages = ["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80"];
+    }
 
     // Store as JSON string array if multiple, or single string for backward compatibility
     const finalImageUrlStr = allImages.length === 1 ? allImages[0] : JSON.stringify(allImages);
@@ -200,7 +223,7 @@ export default function ProductsPage() {
     }
   };
 
-  // Helper to parse image display
+  // Helper to parse primary image display in table
   const getPrimaryImage = (imageUrlStr?: string) => {
     if (!imageUrlStr) return null;
     try {
@@ -211,6 +234,8 @@ export default function ProductsPage() {
     } catch (e) {}
     return imageUrlStr;
   };
+
+  const totalSelectedCount = existingImages.length + imageFiles.length;
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -293,16 +318,16 @@ export default function ProductsPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1">
-                Product Images <span className="text-xs text-indigo-400 font-semibold">(Up to 5 Images like Flipkart, Max 2MB each)</span>
+                Product Images <span className="text-xs text-indigo-400 font-semibold">(Up to 5 Images, Each &lt; 2MB)</span>
               </label>
               <div className="space-y-3">
                 <label className="flex cursor-pointer bg-[#1a1a1a] border border-[#333] hover:border-indigo-500 border-dashed rounded-lg px-4 py-3 text-center transition-colors">
                   <div className="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-indigo-400 w-full">
                     <Upload className="h-5 w-5" />
                     <span className="text-sm">
-                      {imageFiles.length > 0 
-                        ? `${imageFiles.length} of 5 image(s) selected` 
-                        : "Click to select up to 5 images (Auto 50-100KB compressed)"}
+                      {totalSelectedCount > 0 
+                        ? `${totalSelectedCount} of 5 image(s) selected` 
+                        : "Click to select image(s) (Max 2MB each)"}
                     </span>
                   </div>
                   <input
@@ -315,60 +340,55 @@ export default function ProductsPage() {
                   />
                 </label>
 
-                {/* Selected File Previews (up to 5 slots with Red X Cross button) */}
-                {imageFiles.length > 0 ? (
-                  <div className="flex items-center gap-2 pt-1">
-                    {Array.from({ length: 5 }).map((_, idx) => {
-                      const file = imageFiles[idx];
-                      return (
-                        <div key={idx} className="h-14 w-14 rounded-md overflow-hidden bg-[#262626] border border-[#333] flex items-center justify-center relative group">
-                          {file ? (
-                            <>
-                              <img src={URL.createObjectURL(file)} alt={`Slot ${idx + 1}`} className="h-full w-full object-cover" />
-                              <span className="absolute bottom-0 right-0 bg-indigo-600 text-white text-[9px] font-bold px-1">{idx + 1}</span>
-                              <button
-                                type="button"
-                                onClick={(e) => { e.preventDefault(); removeImageFile(idx); }}
-                                className="absolute top-0 right-0 bg-red-600 hover:bg-red-700 text-white p-0.5 rounded-bl-md shadow transition-colors z-10"
-                                title="Remove image"
-                              >
-                                <X className="h-3.5 w-3.5" />
-                              </button>
-                            </>
-                          ) : (
-                            <span className="text-xs text-gray-600 font-medium">#{idx + 1}</span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : existingImages.length > 0 ? (
-                  <div className="flex items-center gap-2 pt-1">
-                    {Array.from({ length: 5 }).map((_, idx) => {
-                      const imgUrl = existingImages[idx];
-                      return (
-                        <div key={idx} className="h-14 w-14 rounded-md overflow-hidden bg-[#262626] border border-[#333] flex items-center justify-center relative group">
-                          {imgUrl ? (
-                            <>
-                              <img src={imgUrl} alt={`Existing ${idx + 1}`} className="h-full w-full object-cover" />
-                              <span className="absolute bottom-0 right-0 bg-indigo-600 text-white text-[9px] font-bold px-1">{idx + 1}</span>
-                              <button
-                                type="button"
-                                onClick={(e) => { e.preventDefault(); removeExistingImage(idx); }}
-                                className="absolute top-0 right-0 bg-red-600 hover:bg-red-700 text-white p-0.5 rounded-bl-md shadow transition-colors z-10"
-                                title="Remove image"
-                              >
-                                <X className="h-3.5 w-3.5" />
-                              </button>
-                            </>
-                          ) : (
-                            <span className="text-xs text-gray-600 font-medium">#{idx + 1}</span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : null}
+                {/* Unified 5-Slot Preview Grid with Prominent Red X Cancel Badge */}
+                <div className="flex items-center gap-3 pt-2">
+                  {Array.from({ length: 5 }).map((_, idx) => {
+                    let imgSrc = "";
+                    let isExisting = false;
+                    let fileIndex = -1;
+
+                    if (idx < existingImages.length) {
+                      imgSrc = existingImages[idx];
+                      isExisting = true;
+                    } else if (idx < existingImages.length + imageFiles.length) {
+                      fileIndex = idx - existingImages.length;
+                      const file = imageFiles[fileIndex];
+                      if (file) imgSrc = URL.createObjectURL(file);
+                    }
+
+                    return (
+                      <div key={idx} className="h-14 w-14 rounded-lg bg-[#262626] border border-[#333] flex items-center justify-center relative group">
+                        {imgSrc ? (
+                          <>
+                            <img src={imgSrc} alt={`Slot ${idx + 1}`} className="h-full w-full object-cover rounded-lg" />
+                            <span className="absolute bottom-0.5 right-0.5 bg-indigo-600/90 text-white text-[9px] font-bold px-1 rounded">
+                              #{idx + 1}
+                            </span>
+                            {/* Prominent Red Circular Cancel (X) Badge */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (isExisting) {
+                                  removeExistingImage(idx);
+                                } else {
+                                  removeImageFile(fileIndex);
+                                }
+                              }}
+                              className="absolute -top-1.5 -right-1.5 bg-red-600 hover:bg-red-700 text-white w-5 h-5 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 z-30 border border-white/20"
+                              title="Remove image"
+                            >
+                              <X className="h-3.5 w-3.5 stroke-[3]" />
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-xs text-gray-600 font-medium">#{idx + 1}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
