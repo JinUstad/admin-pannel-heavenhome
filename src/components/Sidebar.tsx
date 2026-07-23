@@ -8,7 +8,8 @@ import {
   Tags, 
   Users, 
   Archive,
-  LogOut
+  LogOut,
+  Settings
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -18,6 +19,7 @@ const navigation = [
   { name: "Categories", href: "/categories", icon: Tags },
   { name: "Inventory", href: "/inventory", icon: Archive },
   { name: "Users", href: "/users", icon: Users },
+  { name: "Settings", href: "/settings", icon: Settings },
 ];
 
 export function Sidebar() {
@@ -70,23 +72,21 @@ export function Sidebar() {
         })}
       </nav>
       <div className="p-4 border-t border-[#262626]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-sm font-bold text-white">
-              AD
-            </div>
-            <div>
-              <p className="text-sm font-medium text-white">Admin</p>
-              <p className="text-xs text-gray-400">admin@heavenhome.com</p>
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-sm font-bold text-indigo-400">
+            AD
           </div>
-          <button 
-            onClick={handleLogout}
-            className="p-2 text-gray-400 hover:text-red-400 hover:bg-[#1a1a1a] rounded-md transition-colors"
-            title="Log out"
-          >
-            <LogOut className="h-5 w-5" />
-          </button>
+          <div>
+            <p className="text-sm font-medium text-white">Administrator</p>
+            <button 
+              onClick={handleLogout}
+              className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1 mt-0.5 transition-colors"
+              title="Log out securely"
+            >
+              <LogOut className="h-3 w-3" />
+              Log out
+            </button>
+          </div>
         </div>
       </div>
     </div>
