@@ -1,14 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://brhegcxnzniosyibbufs.supabase.co";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJyaGVnY3huem5pb3N5aWJidWZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NjU3ODQsImV4cCI6MjEwMDM0MTc4NH0.IzYWNsQWi3SCZIKgKl91-jxKHunAsm1jE7TSbYBP5Ew";
 
-// We use the anon key here for public read operations (like user facing things) 
-// and in Next.js Server Components, we could use the service role key for admin privileges.
-export const supabase = supabaseUrl && supabaseAnonKey 
-  ? createClient(supabaseUrl, supabaseAnonKey) 
-  : null as any;
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export const supabaseAdmin = supabaseUrl && supabaseAnonKey
-  ? createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey)
-  : null as any;
+export const supabaseAdmin = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey);

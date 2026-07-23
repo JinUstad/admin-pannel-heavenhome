@@ -21,14 +21,19 @@ export default function ProductsPage() {
 
   const fetchData = async () => {
     setFetching(true);
-    const [catsRes, prodsRes] = await Promise.all([
-      supabase.from("categories").select("*").order("name"),
-      supabase.from("products").select("*, categories(name)").order("created_at", { ascending: false })
-    ]);
-    
-    if (catsRes.data) setCategories(catsRes.data);
-    if (prodsRes.data) setProducts(prodsRes.data);
-    setFetching(false);
+    try {
+      const [catsRes, prodsRes] = await Promise.all([
+        supabase.from("categories").select("*").order("name"),
+        supabase.from("products").select("*, categories(name)").order("created_at", { ascending: false })
+      ]);
+      
+      if (catsRes.data) setCategories(catsRes.data);
+      if (prodsRes.data) setProducts(prodsRes.data);
+    } catch (e) {
+      console.error("Error fetching admin data:", e);
+    } finally {
+      setFetching(false);
+    }
   };
 
   useEffect(() => {

@@ -13,12 +13,21 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (data.user?.email) {
-        setUserEmail(data.user.email);
-      } else {
-        const storedEmail = localStorage.getItem('admin_email');
-        setUserEmail(storedEmail || "admin@heavenhome.com");
+      try {
+        const storedEmail = typeof window !== 'undefined' ? localStorage.getItem('admin_email') : null;
+        if (storedEmail) {
+          setUserEmail(storedEmail);
+          return;
+        }
+        
+        const { data } = await supabase.auth.getUser();
+        if (data?.user?.email) {
+          setUserEmail(data.user.email);
+        } else {
+          setUserEmail("heavenhome@gmail.com");
+        }
+      } catch (e) {
+        setUserEmail("heavenhome@gmail.com");
       }
     };
     fetchUser();
