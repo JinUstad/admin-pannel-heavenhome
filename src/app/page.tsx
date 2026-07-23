@@ -6,20 +6,13 @@ import {
 } from 'recharts';
 import { Users, Package, ShoppingCart, DollarSign } from 'lucide-react';
 
-const salesData = [
-  { name: 'Jan', total: 1200 },
-  { name: 'Feb', total: 2100 },
-  { name: 'Mar', total: 800 },
-  { name: 'Apr', total: 1600 },
-  { name: 'May', total: 900 },
-  { name: 'Jun', total: 1700 },
-];
+const salesData: any[] = [];
 
 const stats = [
-  { name: 'Total Revenue', value: '$45,231.89', icon: DollarSign, change: '+20.1%' },
-  { name: 'Sales', value: '+2350', icon: ShoppingCart, change: '+180.1%' },
-  { name: 'Products', value: '+12,234', icon: Package, change: '+19%' },
-  { name: 'Active Users', value: '+573', icon: Users, change: '+201' },
+  { name: 'Total Revenue', value: '$0.00', icon: DollarSign, change: '0%' },
+  { name: 'Sales', value: '0', icon: ShoppingCart, change: '0%' },
+  { name: 'Products', value: '0', icon: Package, change: '0%' },
+  { name: 'Active Users', value: '0', icon: Users, change: '0' },
 ];
 
 export default function DashboardOverview() {
@@ -73,7 +66,7 @@ export default function DashboardOverview() {
         </div>
 
         <div className="bg-[#121212] border border-[#262626] rounded-xl p-6">
-          <h3 className="text-lg font-medium text-white mb-6">Active Users (Mock Data)</h3>
+          <h3 className="text-lg font-medium text-white mb-6">Active Users</h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={salesData}>
