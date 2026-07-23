@@ -62,6 +62,14 @@ export default function ProductsPage() {
     setImageFiles(selectedFiles);
   };
 
+  const removeImageFile = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = (index: number) => {
+    setExistingImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !price || !categoryId) return;
@@ -307,17 +315,25 @@ export default function ProductsPage() {
                   />
                 </label>
 
-                {/* Selected File Previews (up to 5 slots) */}
+                {/* Selected File Previews (up to 5 slots with Red X Cross button) */}
                 {imageFiles.length > 0 ? (
                   <div className="flex items-center gap-2 pt-1">
                     {Array.from({ length: 5 }).map((_, idx) => {
                       const file = imageFiles[idx];
                       return (
-                        <div key={idx} className="h-14 w-14 rounded-md overflow-hidden bg-[#262626] border border-[#333] flex items-center justify-center relative">
+                        <div key={idx} className="h-14 w-14 rounded-md overflow-hidden bg-[#262626] border border-[#333] flex items-center justify-center relative group">
                           {file ? (
                             <>
                               <img src={URL.createObjectURL(file)} alt={`Slot ${idx + 1}`} className="h-full w-full object-cover" />
                               <span className="absolute bottom-0 right-0 bg-indigo-600 text-white text-[9px] font-bold px-1">{idx + 1}</span>
+                              <button
+                                type="button"
+                                onClick={(e) => { e.preventDefault(); removeImageFile(idx); }}
+                                className="absolute top-0 right-0 bg-red-600 hover:bg-red-700 text-white p-0.5 rounded-bl-md shadow transition-colors z-10"
+                                title="Remove image"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
                             </>
                           ) : (
                             <span className="text-xs text-gray-600 font-medium">#{idx + 1}</span>
@@ -331,11 +347,19 @@ export default function ProductsPage() {
                     {Array.from({ length: 5 }).map((_, idx) => {
                       const imgUrl = existingImages[idx];
                       return (
-                        <div key={idx} className="h-14 w-14 rounded-md overflow-hidden bg-[#262626] border border-[#333] flex items-center justify-center relative">
+                        <div key={idx} className="h-14 w-14 rounded-md overflow-hidden bg-[#262626] border border-[#333] flex items-center justify-center relative group">
                           {imgUrl ? (
                             <>
                               <img src={imgUrl} alt={`Existing ${idx + 1}`} className="h-full w-full object-cover" />
                               <span className="absolute bottom-0 right-0 bg-indigo-600 text-white text-[9px] font-bold px-1">{idx + 1}</span>
+                              <button
+                                type="button"
+                                onClick={(e) => { e.preventDefault(); removeExistingImage(idx); }}
+                                className="absolute top-0 right-0 bg-red-600 hover:bg-red-700 text-white p-0.5 rounded-bl-md shadow transition-colors z-10"
+                                title="Remove image"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
                             </>
                           ) : (
                             <span className="text-xs text-gray-600 font-medium">#{idx + 1}</span>
