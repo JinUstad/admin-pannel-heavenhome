@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Plus, Tags, Trash2, Edit2, X, Check } from "lucide-react";
+import { Plus, Tags, Trash2, Edit2, X, Check, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<any[]>([]);
@@ -10,6 +10,10 @@ export default function CategoriesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+
+  // Pagination State (10 items per page)
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const fetchCategories = async () => {
     setFetching(true);
@@ -79,6 +83,12 @@ export default function CategoriesPage() {
     }
   };
 
+  // Calculate Pagination Slicing (10 items per page)
+  const totalPages = Math.ceil(categories.length / ITEMS_PER_PAGE) || 1;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedCategories = categories.slice(startIndex, endIndex);
+
   return (
     <div className="p-8 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-8">
@@ -136,63 +146,117 @@ export default function CategoriesPage() {
         </div>
 
         {/* List */}
-        <div className="lg:col-span-2 bg-[#121212] border border-[#262626] rounded-xl overflow-hidden">
-          <div className="p-6 border-b border-[#262626]">
-            <h3 className="text-lg font-medium text-white">Existing Categories</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-[#1a1a1a] border-b border-[#262626]">
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Created At</th>
-                  <th className="px-6 py-3 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#262626]">
-                {fetching ? (
-                  <tr>
-                    <td colSpan={3} className="px-6 py-8 text-center text-gray-400">Loading categories...</td>
+        <div className="lg:col-span-2 bg-[#121212] border border-[#262626] rounded-xl overflow-hidden flex flex-col justify-between">
+          <div>
+            <div className="p-6 border-b border-[#262626] flex items-center justify-between">
+              <h3 className="text-lg font-medium text-white">Existing Categories</h3>
+              <span className="text-xs text-gray-400 bg-[#1a1a1a] px-3 py-1 rounded-full border border-[#333]">
+                Total: {categories.length} Categories
+              </span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-[#1a1a1a] border-b border-[#262626]">
+                    <th className="px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Name</th>
+                    <th className="px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Created At</th>
+                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
                   </tr>
-                ) : categories.length === 0 ? (
-                  <tr>
-                    <td colSpan={3} className="px-6 py-8 text-center text-gray-400">No categories found. Add one to get started.</td>
-                  </tr>
-                ) : (
-                  categories.map((category) => (
-                    <tr key={category.id} className={`hover:bg-[#1a1a1a]/50 transition-colors ${editingId === category.id ? 'bg-emerald-500/10' : ''}`}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                        {category.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                        {new Date(category.created_at).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center justify-end gap-2">
-                          <button 
-                            onClick={() => handleEdit(category)}
-                            className="text-emerald-400 hover:text-emerald-300 transition-colors p-2 rounded-md hover:bg-emerald-400/10"
-                            title="Edit Category"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleDelete(category.id)}
-                            className="text-red-400 hover:text-red-300 transition-colors p-2 rounded-md hover:bg-red-400/10"
-                            title="Delete Category"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
+                </thead>
+                <tbody className="divide-y divide-[#262626]">
+                  {fetching ? (
+                    <tr>
+                      <td colSpan={3} className="px-6 py-8 text-center text-gray-400">Loading categories...</td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : categories.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="px-6 py-8 text-center text-gray-400">No categories found. Add one to get started.</td>
+                    </tr>
+                  ) : (
+                    paginatedCategories.map((category) => (
+                      <tr key={category.id} className={`hover:bg-[#1a1a1a]/50 transition-colors ${editingId === category.id ? 'bg-emerald-500/10' : ''}`}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                          {category.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                          {new Date(category.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <div className="flex items-center justify-end gap-2">
+                            <button 
+                              onClick={() => handleEdit(category)}
+                              className="text-emerald-400 hover:text-emerald-300 transition-colors p-2 rounded-md hover:bg-emerald-400/10"
+                              title="Edit Category"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(category.id)}
+                              className="text-red-400 hover:text-red-300 transition-colors p-2 rounded-md hover:bg-red-400/10"
+                              title="Delete Category"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
+
+          {/* PAGINATION CONTROLS (10 items per page) */}
+          {categories.length > 0 && (
+            <div className="p-4 border-t border-[#262626] bg-[#1a1a1a]/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
+              <div>
+                Showing <span className="font-bold text-white">{startIndex + 1}</span> to{" "}
+                <span className="font-bold text-white">{Math.min(endIndex, categories.length)}</span> of{" "}
+                <span className="font-bold text-white">{categories.length}</span> categories
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 rounded-lg bg-[#262626] hover:bg-[#333] text-gray-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1 transition-colors"
+                >
+                  <ChevronLeft className="h-4 w-4" /> Previous
+                </button>
+
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }).map((_, idx) => {
+                    const pageNum = idx + 1;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`w-8 h-8 rounded-lg font-semibold transition-colors ${
+                          currentPage === pageNum
+                            ? "bg-emerald-600 text-white shadow-md"
+                            : "bg-[#262626] text-gray-400 hover:bg-[#333] hover:text-white"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 rounded-lg bg-[#262626] hover:bg-[#333] text-gray-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1 transition-colors"
+                >
+                  Next <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
+

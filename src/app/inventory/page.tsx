@@ -20,7 +20,9 @@ import {
   ArrowRight,
   PlusCircle,
   Building2,
-  Store
+  Store,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 
 export default function InventoryPage() {
@@ -33,6 +35,10 @@ export default function InventoryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK">("ALL");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
+
+  // Pagination State (10 items per page)
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   // Storeroom Entry Modal State
   const [isEntryModalOpen, setIsEntryModalOpen] = useState(false);
@@ -236,6 +242,12 @@ export default function InventoryPage() {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
+  // Calculate Pagination Slicing (10 items per page)
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE) || 1;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedInventory = filteredProducts.slice(startIndex, endIndex);
+
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8 relative">
       {/* Toast Notification */}
@@ -431,7 +443,7 @@ export default function InventoryPage() {
                   </td>
                 </tr>
               ) : (
-                filteredProducts.map(product => {
+                paginatedInventory.map(product => {
                   const storeroomQty = product.storeroom_stock || 0;
                   const shopQty = product.stock || 0;
                   const totalQty = storeroomQty + shopQty;
@@ -557,6 +569,54 @@ export default function InventoryPage() {
             </tbody>
           </table>
         </div>
+
+        {/* PAGINATION CONTROLS (10 items per page) */}
+        {filteredProducts.length > 0 && (
+          <div className="p-4 border-t border-[#262626] bg-[#1a1a1a]/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
+            <div>
+              Showing <span className="font-bold text-white">{startIndex + 1}</span> to{" "}
+              <span className="font-bold text-white">{Math.min(endIndex, filteredProducts.length)}</span> of{" "}
+              <span className="font-bold text-white">{filteredProducts.length}</span> items
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 rounded-lg bg-[#262626] hover:bg-[#333] text-gray-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1 transition-colors"
+              >
+                <ChevronLeft className="h-4 w-4" /> Previous
+              </button>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }).map((_, idx) => {
+                  const pageNum = idx + 1;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`w-8 h-8 rounded-lg font-semibold transition-colors ${
+                        currentPage === pageNum
+                          ? "bg-emerald-600 text-white shadow-md"
+                          : "bg-[#262626] text-gray-400 hover:bg-[#333] hover:text-white"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 rounded-lg bg-[#262626] hover:bg-[#333] text-gray-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1 transition-colors"
+              >
+                Next <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* INSERT STOREROOM STOCK MODAL */}
