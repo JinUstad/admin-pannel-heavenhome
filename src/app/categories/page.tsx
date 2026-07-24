@@ -84,7 +84,7 @@ export default function CategoriesPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
-            <Tags className="h-8 w-8 text-indigo-400" />
+            <Tags className="h-8 w-8 text-emerald-400" />
             Categories
           </h2>
           <p className="text-gray-400 mt-2">Manage product categories for your store.</p>
@@ -118,7 +118,7 @@ export default function CategoriesPage() {
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
                 placeholder="e.g. Living Room Furniture"
                 required
               />
@@ -126,7 +126,7 @@ export default function CategoriesPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
             >
               {loading ? (editingId ? "Saving..." : "Adding...") : (
                 editingId ? <><Check className="h-4 w-4" /> Save Changes</> : <><Plus className="h-4 w-4" /> Add Category</>
@@ -160,7 +160,7 @@ export default function CategoriesPage() {
                   </tr>
                 ) : (
                   categories.map((category) => (
-                    <tr key={category.id} className={`hover:bg-[#1a1a1a]/50 transition-colors ${editingId === category.id ? 'bg-indigo-500/10' : ''}`}>
+                    <tr key={category.id} className={`hover:bg-[#1a1a1a]/50 transition-colors ${editingId === category.id ? 'bg-emerald-500/10' : ''}`}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                         {category.name}
                       </td>
@@ -171,7 +171,7 @@ export default function CategoriesPage() {
                         <div className="flex items-center justify-end gap-2">
                           <button 
                             onClick={() => handleEdit(category)}
-                            className="text-indigo-400 hover:text-indigo-300 transition-colors p-2 rounded-md hover:bg-indigo-400/10"
+                            className="text-emerald-400 hover:text-emerald-300 transition-colors p-2 rounded-md hover:bg-emerald-400/10"
                             title="Edit Category"
                           >
                             <Edit2 className="h-4 w-4" />

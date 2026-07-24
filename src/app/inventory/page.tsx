@@ -250,7 +250,7 @@ export default function InventoryPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
-            <Warehouse className="h-8 w-8 text-indigo-400" />
+            <Warehouse className="h-8 w-8 text-emerald-400" />
             Storeroom & Inventory Management
           </h2>
           <p className="text-gray-400 mt-1 text-sm">
@@ -260,7 +260,7 @@ export default function InventoryPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsEntryModalOpen(true)}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl transition-all shadow-lg font-semibold text-sm"
+            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl transition-all shadow-lg font-semibold text-sm"
           >
             <PlusCircle className="h-4 w-4" />
             Insert Storeroom Stock
@@ -270,7 +270,7 @@ export default function InventoryPage() {
             disabled={fetching}
             className="flex items-center gap-2 bg-[#1a1a1a] hover:bg-[#262626] text-gray-300 hover:text-white px-3.5 py-2.5 rounded-xl border border-[#333] transition-colors text-sm font-medium"
           >
-            <RefreshCw className={`h-4 w-4 ${fetching ? "animate-spin text-indigo-400" : ""}`} />
+            <RefreshCw className={`h-4 w-4 ${fetching ? "animate-spin text-emerald-400" : ""}`} />
           </button>
         </div>
       </div>
@@ -351,7 +351,7 @@ export default function InventoryPage() {
             <button
               onClick={() => setStatusFilter("ALL")}
               className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                statusFilter === "ALL" ? "bg-indigo-600 text-white" : "text-gray-400 hover:text-white"
+                statusFilter === "ALL" ? "bg-emerald-600 text-white" : "text-gray-400 hover:text-white"
               }`}
             >
               All ({products.length})

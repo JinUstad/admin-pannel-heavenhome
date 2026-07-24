@@ -275,7 +275,7 @@ export default function ProductsPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
-            <Package className="h-8 w-8 text-indigo-400" />
+            <Package className="h-8 w-8 text-emerald-400" />
             Products
           </h2>
           <p className="text-gray-400 mt-2">Manage products, pricing, discounts, and multi-image inventory.</p>
@@ -467,7 +467,7 @@ export default function ProductsPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50 mt-2"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50 mt-2 shadow-md"
             >
               {loading ? (editingId ? "Saving..." : "Adding...") : (
                 editingId ? <><Check className="h-4 w-4" /> Save Product Changes</> : <><Plus className="h-4 w-4" /> Add Product</>

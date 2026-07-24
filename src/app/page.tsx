@@ -27,7 +27,7 @@ export default function DashboardOverview() {
         {stats.map((stat) => (
           <div
             key={stat.name}
-            className="bg-[#121212] border border-[#262626] rounded-xl p-6 shadow-sm hover:border-indigo-500/50 transition-colors"
+            className="bg-[#121212] border border-[#262626] rounded-xl p-6 shadow-sm hover:border-emerald-500/50 transition-colors"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -35,7 +35,7 @@ export default function DashboardOverview() {
                 <p className="mt-2 text-3xl font-bold text-white">{stat.value}</p>
               </div>
               <div className="p-3 bg-[#1a1a1a] rounded-lg">
-                <stat.icon className="h-6 w-6 text-indigo-400" />
+                <stat.icon className="h-6 w-6 text-emerald-400" />
               </div>
             </div>
             <div className="mt-4 flex items-center text-sm">
@@ -59,7 +59,7 @@ export default function DashboardOverview() {
                   contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #262626', borderRadius: '8px' }}
                   itemStyle={{ color: '#fff' }}
                 />
-                <Bar dataKey="total" fill="#818cf8" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="total" fill="#10b981" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -77,7 +77,7 @@ export default function DashboardOverview() {
                   contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #262626', borderRadius: '8px' }}
                   itemStyle={{ color: '#fff' }}
                 />
-                <Line type="monotone" dataKey="total" stroke="#c084fc" strokeWidth={3} dot={{ r: 4, fill: '#c084fc' }} />
+                <Line type="monotone" dataKey="total" stroke="#34d399" strokeWidth={3} dot={{ r: 4, fill: '#34d399' }} />
               </LineChart>
             </ResponsiveContainer>
           </div>

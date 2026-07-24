@@ -43,13 +43,13 @@ export function Sidebar() {
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-[#0a0a0a] border-r border-[#262626] text-[#ededed]">
       <div className="flex h-16 items-center justify-between px-6 border-b border-[#262626]">
-        <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+        <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-400 via-emerald-300 to-amber-400 bg-clip-text text-transparent">
           Heaven Home
         </h1>
         {/* Mobile close button */}
         <button 
           onClick={() => setMobileMenuOpen(false)}
-          className="md:hidden text-gray-400 hover:text-white p-1"
+          className="text-gray-400 hover:text-white p-1"
         >
           <X className="h-6 w-6" />
         </button>
@@ -72,7 +72,7 @@ export function Sidebar() {
             >
               <item.icon
                 className={clsx(
-                  isActive ? "text-indigo-400" : "text-gray-400 group-hover:text-gray-300",
+                  isActive ? "text-emerald-400" : "text-gray-400 group-hover:text-gray-300",
                   "flex-shrink-0 -ml-1 mr-3 h-5 w-5"
                 )}
                 aria-hidden="true"
@@ -85,7 +85,7 @@ export function Sidebar() {
 
       <div className="p-4 border-t border-[#262626] space-y-3">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-sm font-bold text-indigo-400 shrink-0">
+          <div className="h-10 w-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-sm font-bold text-emerald-400 shrink-0">
             AD
           </div>
           <div className="min-w-0 flex-1">
@@ -106,7 +106,7 @@ export function Sidebar() {
             href="https://www.devfordevs.in"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-indigo-400 hover:underline font-medium"
+            className="text-amber-400 hover:underline font-semibold"
           >
             DevforDevs
           </a>
