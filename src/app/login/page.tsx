@@ -52,11 +52,10 @@ export default function LoginPage() {
     <div className="flex h-screen w-full items-center justify-center bg-[#0a0a0a]">
       <div className="w-full max-w-md bg-[#121212] p-8 rounded-xl border border-[#262626] shadow-xl">
         <div className="flex flex-col items-center mb-8">
-          <div className="h-12 w-12 bg-emerald-500/10 rounded-full flex items-center justify-center mb-4 border border-emerald-500/20">
-            <Lock className="h-6 w-6 text-emerald-400" />
-          </div>
-          <h1 className="text-2xl font-bold text-white">Admin Login</h1>
-          <p className="text-gray-400 text-sm mt-2">Enter your credentials to access the dashboard</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Heaven Home Logo" className="h-16 w-auto object-contain mb-4" />
+          <h1 className="text-2xl font-bold text-white">Welcome Back</h1>
+          <p className="text-gray-400 text-sm mt-1">Enter your credentials to access the Heaven Home admin panel</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
