@@ -83,7 +83,7 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="p-4 border-t border-[#262626]">
+      <div className="p-4 border-t border-[#262626] space-y-3">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-sm font-bold text-indigo-400 shrink-0">
             AD
@@ -100,9 +100,21 @@ export function Sidebar() {
             </button>
           </div>
         </div>
+        <div className="text-[11px] text-gray-500 pt-1 border-t border-[#1a1a1a] text-center">
+          Design by{" "}
+          <a
+            href="https://www.devfordevs.in"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-indigo-400 hover:underline font-medium"
+          >
+            DevforDevs
+          </a>
+        </div>
       </div>
     </div>
   );
+
 
   return (
     <>
