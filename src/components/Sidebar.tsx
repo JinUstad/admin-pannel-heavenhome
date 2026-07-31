@@ -12,12 +12,14 @@ import {
   LogOut,
   Settings,
   Menu,
-  X
+  X,
+  MessageSquare
 } from "lucide-react";
 import clsx from "clsx";
 
 const navigation = [
   { name: "Overview", href: "/", icon: LayoutDashboard },
+  { name: "Contacts", href: "/contacts", icon: MessageSquare },
   { name: "Products", href: "/products", icon: Package },
   { name: "Categories", href: "/categories", icon: Tags },
   { name: "Inventory", href: "/inventory", icon: Archive },
