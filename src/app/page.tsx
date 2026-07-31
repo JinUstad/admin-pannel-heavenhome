@@ -9,7 +9,7 @@ import { Users, Package, ShoppingCart, DollarSign } from 'lucide-react';
 const salesData: any[] = [];
 
 const stats = [
-  { name: 'Total Revenue', value: '$0.00', icon: DollarSign, change: '0%' },
+  { name: 'Total Revenue', value: '₹0.00', icon: DollarSign, change: '0%' },
   { name: 'Sales', value: '0', icon: ShoppingCart, change: '0%' },
   { name: 'Products', value: '0', icon: Package, change: '0%' },
   { name: 'Active Users', value: '0', icon: Users, change: '0' },
@@ -54,7 +54,7 @@ export default function DashboardOverview() {
               <BarChart data={salesData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#262626" vertical={false} />
                 <XAxis dataKey="name" stroke="#a3a3a3" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#a3a3a3" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
+                <YAxis stroke="#a3a3a3" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value}`} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #262626', borderRadius: '8px' }}
                   itemStyle={{ color: '#fff' }}

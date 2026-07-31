@@ -332,7 +332,7 @@ export default function ProductsPage() {
             {/* Price & Stock Grid */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Selling Price ($)</label>
+                <label className="block text-sm font-medium text-gray-400 mb-1">Selling Price (₹)</label>
                 <input
                   type="number"
                   step="0.01"
@@ -345,7 +345,7 @@ export default function ProductsPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Original MRP ($) <span className="text-[10px] text-gray-500">(Strikethrough)</span>
+                  Original MRP (₹) <span className="text-[10px] text-gray-500">(Strikethrough)</span>
                 </label>
                 <input
                   type="number"
@@ -534,9 +534,9 @@ export default function ProductsPage() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm">
                             <div className="flex flex-col">
-                              <span className="text-green-400 font-bold">${parseFloat(product.price).toFixed(2)}</span>
+                              <span className="text-green-400 font-bold">₹{parseFloat(product.price).toFixed(2)}</span>
                               {product.old_price && (
-                                <span className="text-xs text-gray-500 line-through">${parseFloat(product.old_price).toFixed(2)}</span>
+                                <span className="text-xs text-gray-500 line-through">₹{parseFloat(product.old_price).toFixed(2)}</span>
                               )}
                             </div>
                           </td>
