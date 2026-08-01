@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AdminAuthGuard } from "@/components/AdminAuthGuard";
+import { Sidebar } from "@/components/Sidebar";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -28,10 +28,11 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} h-full antialiased dark`}
     >
-      <body className="h-full bg-[#0a0a0a] text-white">
-        <AdminAuthGuard>
+      <body className="h-full flex flex-col md:flex-row overflow-hidden bg-[#0a0a0a] text-white">
+        <Sidebar />
+        <main className="flex-1 overflow-y-auto bg-[#0a0a0a] pt-14 md:pt-0">
           {children}
-        </AdminAuthGuard>
+        </main>
       </body>
     </html>
   );
