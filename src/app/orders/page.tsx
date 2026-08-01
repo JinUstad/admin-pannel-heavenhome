@@ -182,7 +182,9 @@ export default function OrdersPage() {
     setConfirmingId(orderId);
     try {
       const confirmedAt = new Date().toISOString();
-      const { error } = await supabase
+      
+      // Try updating with confirmed_at timestamp
+      let updateRes = await supabase
         .from("orders")
         .update({ 
           status: "completed",
@@ -190,7 +192,18 @@ export default function OrdersPage() {
         })
         .eq("id", orderId);
 
-      if (!error) {
+      // If failed (e.g., confirmed_at column does not exist yet), try updating only status
+      if (updateRes.error) {
+        console.warn("Retrying with only status column...", updateRes.error);
+        updateRes = await supabase
+          .from("orders")
+          .update({ 
+            status: "completed"
+          })
+          .eq("id", orderId);
+      }
+
+      if (!updateRes.error) {
         // Optimistic UI Update
         setOrders((prev) =>
           prev.map((o) =>
@@ -206,11 +219,13 @@ export default function OrdersPage() {
           );
         }
       } else {
-        alert("Could not update order status. Please verify database columns.");
-        console.error(error);
+        const errorMsg = updateRes.error.message || updateRes.error.details || JSON.stringify(updateRes.error);
+        alert(`Could not update order status in Supabase: ${errorMsg}\n\nPlease make sure to run the SQL in Supabase SQL Editor to add the 'status' column.`);
+        console.error("Order confirmation error:", updateRes.error);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to confirm order:", err);
+      alert(`Error: ${err?.message || "Failed to confirm order"}`);
     } finally {
       setConfirmingId(null);
     }
