@@ -36,7 +36,7 @@ export default function LoginPage() {
     setLoading(false);
 
     // Also support the hardcoded one as a fallback just in case it wasn't set up in Supabase properly
-    const isHardcodedAdmin = email.trim() === "heavenhome@gmail.com" && (password.trim() === "Heaven@321" || password.trim() === "Heaven@123");
+    const isHardcodedAdmin = email.trim() === "heavenhome@gmail.com" && password.trim() === "Heaven@321";
     
     if (!authError || isHardcodedAdmin) {
       document.cookie = "admin_auth=true; path=/; max-age=86400";

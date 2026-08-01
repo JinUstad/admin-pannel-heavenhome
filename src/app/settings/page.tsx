@@ -62,7 +62,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto w-full">
+    <div className="p-4 sm:p-8 max-w-4xl mx-auto w-full">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">Settings</h1>
         <p className="text-gray-400">Manage your admin account and preferences.</p>

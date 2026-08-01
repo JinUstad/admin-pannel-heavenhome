@@ -249,7 +249,7 @@ export default function InventoryPage() {
   const paginatedInventory = filteredProducts.slice(startIndex, endIndex);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8 relative">
+    <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8 relative">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-emerald-400/30 animate-bounce">

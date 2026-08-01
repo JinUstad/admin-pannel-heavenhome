@@ -44,7 +44,7 @@ export default function DashboardOverview() {
   });
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8">
       <div>
         <h2 className="text-3xl font-bold text-white tracking-tight">Dashboard</h2>
         <p className="text-gray-400 mt-2">Welcome back to Heaven Home admin panel.</p>
