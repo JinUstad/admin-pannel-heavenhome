@@ -41,10 +41,18 @@ export function Sidebar() {
     return null;
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     document.cookie = "admin_auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    router.push('/login');
-    router.refresh();
+    localStorage.removeItem("admin_email");
+    try {
+      const { supabase } = await import("@/lib/supabase");
+      if (supabase) {
+        await supabase.auth.signOut();
+      }
+    } catch (err) {
+      console.warn("Logout error:", err);
+    }
+    window.location.href = "/login";
   };
 
   const SidebarContent = ({ collapsed = false }: { collapsed?: boolean }) => (
