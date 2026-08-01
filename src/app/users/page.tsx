@@ -52,17 +52,19 @@ export default function UsersPage() {
                 <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">User ID</th>
                 <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Email</th>
                 <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Full Name</th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Phone</th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Address & Pincode</th>
                 <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Joined</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#262626]">
               {fetching ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-gray-400">Loading users...</td>
+                  <td colSpan={6} className="px-6 py-8 text-center text-gray-400">Loading users...</td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-gray-400">No users found.</td>
+                  <td colSpan={6} className="px-6 py-8 text-center text-gray-400">No users found.</td>
                 </tr>
               ) : (
                 paginatedUsers.map((user) => (
@@ -78,6 +80,12 @@ export default function UsersPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                       {user.full_name || "N/A"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {user.phone_number || "—"}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-300 max-w-xs truncate" title={user.address ? `${user.address} - ${user.pincode || ''}` : ''}>
+                      {user.address ? `${user.address}${user.pincode ? ` (${user.pincode})` : ''}` : "—"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2 text-sm text-gray-400">

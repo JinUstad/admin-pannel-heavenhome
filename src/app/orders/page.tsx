@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { ListOrdered, Eye, Clock, User, Mail, Calendar, X, ChevronLeft, ChevronRight, Package, Phone } from "lucide-react";
+import { ListOrdered, Eye, Clock, User, Mail, Calendar, X, ChevronLeft, ChevronRight, Package, Phone, MapPin } from "lucide-react";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -26,7 +26,9 @@ export default function OrdersPage() {
         users (
           full_name,
           email,
-          phone_number
+          phone_number,
+          address,
+          pincode
         )
       `)
       .order("created_at", { ascending: false });
@@ -244,6 +246,14 @@ export default function OrdersPage() {
                   <p className="text-gray-400 text-sm flex items-center gap-2 mt-1">
                     <Phone className="h-4 w-4 text-gray-500" />
                     {selectedOrder.users?.phone_number || "No phone provided"}
+                  </p>
+                  <p className="text-gray-400 text-sm flex items-start gap-2 mt-1">
+                    <MapPin className="h-4 w-4 text-gray-500 shrink-0 mt-0.5" />
+                    <span>
+                      {selectedOrder.users?.address 
+                        ? `${selectedOrder.users.address}${selectedOrder.users.pincode ? ` - ${selectedOrder.users.pincode}` : ''}`
+                        : "No address provided"}
+                    </span>
                   </p>
                 </div>
                 <div className="sm:text-right">

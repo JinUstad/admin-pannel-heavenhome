@@ -14,13 +14,15 @@ import {
   Menu,
   X,
   MessageSquare,
-  ListOrdered
+  ListOrdered,
+  BookOpen
 } from "lucide-react";
 import clsx from "clsx";
 
 const navigation = [
   { name: "Overview", href: "/", icon: LayoutDashboard },
   { name: "Orders", href: "/orders", icon: ListOrdered },
+  { name: "Blogs", href: "/blogs", icon: BookOpen },
   { name: "Contacts", href: "/contacts", icon: MessageSquare },
   { name: "Products", href: "/products", icon: Package },
   { name: "Categories", href: "/categories", icon: Tags },
