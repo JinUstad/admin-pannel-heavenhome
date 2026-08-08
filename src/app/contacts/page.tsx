@@ -160,14 +160,14 @@ export default function ContactsPage() {
                       <td className="px-6 py-4">
                         <div className="font-medium text-white">{msg.first_name} {msg.last_name}</div>
                       </td>
-                      <td className="px-6 py-4 space-y-1">
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-3.5 w-3.5 text-gray-400" />
-                          <span>{msg.email}</span>
+                      <td className="px-6 py-4 space-y-1 max-w-[220px]">
+                        <div className="flex items-center gap-2 truncate" title={msg.email}>
+                          <Mail className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                          <span className="truncate">{msg.email}</span>
                         </div>
                         {msg.phone && (
                           <div className="flex items-center gap-2 text-gray-400">
-                            <Phone className="h-3.5 w-3.5" />
+                            <Phone className="h-3.5 w-3.5 shrink-0" />
                             <span>{msg.phone}</span>
                           </div>
                         )}
@@ -213,64 +213,76 @@ export default function ContactsPage() {
 
       {/* Message Modal */}
       {selectedMessage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#1a1a1a] border border-[#333] rounded-xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-[#333]">
-              <h3 className="text-lg font-bold text-white">Contact Details</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#1a1a1a] border border-[#333] rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between p-5 border-b border-[#333]">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Mail className="h-5 w-5 text-emerald-400" />
+                Contact Details
+              </h3>
               <button 
                 onClick={() => setSelectedMessage(null)}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-gray-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             
-            <div className="p-6 text-gray-300 max-h-[70vh] overflow-y-auto space-y-6">
+            <div className="p-6 text-gray-300 max-h-[70vh] overflow-y-auto overflow-x-hidden space-y-5 custom-scrollbar">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-[#0a0a0a] p-4 rounded-lg border border-[#333]">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Name</p>
-                  <p className="font-medium text-white">{selectedMessage.first_name} {selectedMessage.last_name}</p>
+                <div className="bg-[#0e0e0e] p-4 rounded-xl border border-[#2a2a2a] min-w-0">
+                  <p className="text-[11px] text-gray-400 uppercase tracking-wider font-bold mb-1">Customer Name</p>
+                  <p className="font-semibold text-white break-words">{selectedMessage.first_name} {selectedMessage.last_name}</p>
                 </div>
-                <div className="bg-[#0a0a0a] p-4 rounded-lg border border-[#333]">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Email</p>
-                  <p className="font-medium text-white flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-gray-400" />
-                    {selectedMessage.email}
-                  </p>
+                
+                <div className="bg-[#0e0e0e] p-4 rounded-xl border border-[#2a2a2a] min-w-0">
+                  <p className="text-[11px] text-gray-400 uppercase tracking-wider font-bold mb-1">Email Address</p>
+                  <a 
+                    href={`mailto:${selectedMessage.email}`}
+                    className="font-medium text-emerald-400 hover:underline flex items-start gap-1.5 break-all text-sm leading-snug mt-0.5"
+                    title={selectedMessage.email}
+                  >
+                    <Mail className="h-4 w-4 text-emerald-400/80 shrink-0 mt-0.5" />
+                    <span className="break-all">{selectedMessage.email}</span>
+                  </a>
                 </div>
+
                 {selectedMessage.phone && (
-                  <div className="bg-[#0a0a0a] p-4 rounded-lg border border-[#333] sm:col-span-2">
-                    <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Phone</p>
-                    <p className="font-medium text-white flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-gray-400" />
-                      {selectedMessage.phone}
-                    </p>
+                  <div className="bg-[#0e0e0e] p-4 rounded-xl border border-[#2a2a2a] sm:col-span-2 min-w-0">
+                    <p className="text-[11px] text-gray-400 uppercase tracking-wider font-bold mb-1">Phone Number</p>
+                    <a 
+                      href={`tel:${selectedMessage.phone}`}
+                      className="font-medium text-emerald-400 hover:underline flex items-center gap-1.5 text-sm mt-0.5"
+                    >
+                      <Phone className="h-4 w-4 text-emerald-400/80 shrink-0" />
+                      <span>{selectedMessage.phone}</span>
+                    </a>
                   </div>
                 )}
               </div>
               
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mb-2">Message</p>
-                <div className="bg-[#0a0a0a] p-4 rounded-lg border border-[#333] leading-relaxed whitespace-pre-wrap">
+                <p className="text-[11px] text-gray-400 uppercase tracking-wider font-bold mb-2">Message</p>
+                <div className="bg-[#0e0e0e] p-4 rounded-xl border border-[#2a2a2a] leading-relaxed whitespace-pre-wrap break-words text-sm text-gray-200">
                   {selectedMessage.message}
                 </div>
               </div>
             </div>
 
-            <div className="p-4 border-t border-[#333] bg-[#0a0a0a] flex justify-end gap-3">
+            <div className="p-4 border-t border-[#333] bg-[#121212] flex justify-end gap-3">
               <button 
                 onClick={() => {
                   handleDelete(selectedMessage.id);
                   setSelectedMessage(null);
                 }}
-                className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl transition-colors text-sm font-medium flex items-center gap-2"
               >
                 <Trash2 className="h-4 w-4" />
                 Delete
               </button>
               <button 
                 onClick={() => setSelectedMessage(null)}
-                className="px-4 py-2 bg-[#262626] hover:bg-[#333] text-white rounded-lg transition-colors text-sm font-medium"
+                className="px-5 py-2 bg-[#262626] hover:bg-[#333] text-white rounded-xl transition-colors text-sm font-medium"
               >
                 Close
               </button>
