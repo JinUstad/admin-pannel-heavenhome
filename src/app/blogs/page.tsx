@@ -266,7 +266,11 @@ export default function BlogsPage() {
 
       // Inline formatter
       const formatInline = (str: string) => {
-        return str
+        let processed = str;
+        const boldCount = (processed.match(/\*\*/g) || []).length;
+        if (boldCount % 2 !== 0) processed = processed + "**";
+
+        return processed
           .replace(/\*\*\*(.*?)\*\*\*/g, '<strong class="font-bold text-white"><em class="italic text-gray-200">$1</em></strong>')
           .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1</strong>')
           .replace(/__(.*?)__/g, '<strong class="font-bold text-white">$1</strong>')
@@ -275,6 +279,12 @@ export default function BlogsPage() {
           .replace(/`([^`]+)`/g, '<code class="bg-[#262626] text-emerald-300 text-xs px-1.5 py-0.5 rounded font-mono border border-[#333]">$1</code>')
           .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" class="text-emerald-400 font-semibold underline hover:text-emerald-300">$1</a>');
       };
+
+      // Standalone bold heading line: e.g. **One Dispenser, Two Convenient Functions
+      const boldHeadingMatch = trimmed.match(/^\*\*([^*]+)\*\*?$/);
+      if (boldHeadingMatch) {
+        return `<h3 class="text-lg font-serif font-bold text-white mt-5 mb-2">${formatInline(boldHeadingMatch[1].trim())}</h3>`;
+      }
 
       if (trimmed.startsWith("### ")) {
         return `<h3 class="text-lg font-bold text-white mt-4 mb-2">${formatInline(trimmed.slice(4))}</h3>`;
@@ -286,7 +296,7 @@ export default function BlogsPage() {
         return `<h1 class="text-2xl font-serif font-bold text-white mt-6 mb-3">${formatInline(trimmed.slice(2))}</h1>`;
       }
       if (trimmed.startsWith("> ")) {
-        return `<blockquote class="border-l-4 border-emerald-500 pl-4 py-1.5 my-3 italic text-gray-300 bg-[#161616] rounded-r">${formatInline(trimmed.slice(2))}</blockquote>`;
+        return `<blockquote class="border-l-4 border-emerald-500 pl-4 py-1.5 my-3 italic text-gray-300 bg-[#161616] rounded-r font-serif">${formatInline(trimmed.slice(2))}</blockquote>`;
       }
       if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
         return `<li class="ml-4 list-disc text-gray-300 my-1">${formatInline(trimmed.slice(2))}</li>`;
