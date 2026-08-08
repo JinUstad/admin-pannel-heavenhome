@@ -48,14 +48,8 @@ interface Blog {
 }
 
 const DEFAULT_CATEGORIES = [
-  "Interior Design",
-  "Living Room",
-  "Bedroom Decor",
-  "Lighting & Ambiance",
-  "Luxury Furniture",
-  "Modern Living",
-  "Styling Guides",
-  "Trends & Inspiration"
+  "Kitchen Essentials",
+  "Jewellery"
 ];
 
 export default function BlogsPage() {
@@ -74,7 +68,7 @@ export default function BlogsPage() {
   // Form State
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("Heaven Home Team");
-  const [category, setCategory] = useState("Interior Design");
+  const [category, setCategory] = useState("Kitchen Essentials");
   const [customCategory, setCustomCategory] = useState("");
   const [publishedAt, setPublishedAt] = useState("");
   const [excerpt, setExcerpt] = useState("");
@@ -130,7 +124,7 @@ export default function BlogsPage() {
     setEditingBlog(null);
     setTitle("");
     setAuthor("Heaven Home Team");
-    setCategory("Interior Design");
+    setCategory("Kitchen Essentials");
     setCustomCategory("");
     setPublishedAt(getNowDateTimeString()); // Auto selected current date & time
     setExcerpt("");
@@ -378,7 +372,7 @@ export default function BlogsPage() {
         title: title.trim(),
         slug: editingBlog?.slug || slug,
         author: author.trim() || "Heaven Home Team",
-        category: finalCategory || "Interior Design",
+        category: finalCategory || "Kitchen Essentials",
         excerpt: generatedExcerpt,
         content: content.trim(),
         image_url: finalImageUrl,
