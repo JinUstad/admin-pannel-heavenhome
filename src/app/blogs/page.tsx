@@ -32,6 +32,7 @@ import {
   FileText
 } from "lucide-react";
 import imageCompression from "browser-image-compression";
+import { convertToWebP } from "@/lib/imageWebp";
 
 interface Blog {
   id: string;
@@ -188,7 +189,7 @@ export default function BlogsPage() {
     setImagePreview(null);
   };
 
-  // Image Upload and 50KB Compression Handler
+  // Image Upload and 50KB WebP Conversion Handler
   const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
@@ -197,30 +198,26 @@ export default function BlogsPage() {
     setCompressing(true);
 
     try {
-      // Compress to strictly under 50KB (maxSizeMB: 0.048 is ~48KB)
-      const options = {
+      // Convert to WebP under 50KB (maxSizeMB: 0.048)
+      const webpFile = await convertToWebP(file, {
         maxSizeMB: 0.048,
         maxWidthOrHeight: 1200,
-        useWebWorker: true,
-        fileType: "image/jpeg",
-        initialQuality: 0.8
-      };
+        quality: 0.82
+      });
+      const compressedSizeKB = webpFile.size / 1024;
 
-      const compressedFile = await imageCompression(file, options);
-      const compressedSizeKB = compressedFile.size / 1024;
-
-      const previewUrl = URL.createObjectURL(compressedFile);
+      const previewUrl = URL.createObjectURL(webpFile);
 
       setImagePreview({
         type: "new",
         src: previewUrl,
-        file: compressedFile,
+        file: webpFile,
         sizeKB: originalSizeKB,
         compressedSizeKB: compressedSizeKB
       });
     } catch (err: any) {
-      console.error("Compression error:", err);
-      alert("Error compressing image: " + err.message);
+      console.error("WebP conversion error:", err);
+      alert("Error processing image to WebP: " + err.message);
     } finally {
       setCompressing(false);
       e.target.value = "";
@@ -258,22 +255,50 @@ export default function BlogsPage() {
 
   // Convert rich text markdown to basic HTML for preview
   const renderFormattedPreview = (text: string) => {
-    if (!text) return "<p class='text-gray-500 italic'>No content yet. Write something in the editor...</p>";
+    if (!text || !text.trim()) {
+      return "<p class='text-gray-500 italic'>No content yet. Write something in the editor...</p>";
+    }
 
-    let formatted = text
-      .replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold text-white mt-4 mb-2">$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold text-emerald-400 mt-5 mb-2">$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-serif font-bold text-white mt-6 mb-3">$1</h1>')
-      .replace(/\*\*(.*?)\*\*/gim, '<strong class="font-bold text-white">$1</strong>')
-      .replace(/\*(.*?)\*/gim, '<em class="italic text-gray-300">$1</em>')
-      .replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-emerald-500 pl-4 py-1.5 my-3 italic text-gray-300 bg-[#161616] rounded-r">$1</blockquote>')
-      .replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2" target="_blank" class="text-emerald-400 underline hover:text-emerald-300">$1</a>')
-      .replace(/^\- (.*$)/gim, '<li class="ml-4 list-disc text-gray-300 my-1">$1</li>')
-      .replace(/^\d+\. (.*$)/gim, '<li class="ml-4 list-decimal text-gray-300 my-1">$1</li>')
-      .replace(/\n\n/gim, '</p><p class="my-3 text-gray-300 leading-relaxed">')
-      .replace(/\n/gim, '<br/>');
+    const lines = text.split("\n");
+    const htmlLines = lines.map((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return "<div class='h-3'></div>";
 
-    return `<p class="my-3 text-gray-300 leading-relaxed">${formatted}</p>`;
+      // Inline formatter
+      const formatInline = (str: string) => {
+        return str
+          .replace(/\*\*\*(.*?)\*\*\*/g, '<strong class="font-bold text-white"><em class="italic text-gray-200">$1</em></strong>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1</strong>')
+          .replace(/__(.*?)__/g, '<strong class="font-bold text-white">$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em class="italic text-gray-300">$1</em>')
+          .replace(/_(.*?)_/g, '<em class="italic text-gray-300">$1</em>')
+          .replace(/`([^`]+)`/g, '<code class="bg-[#262626] text-emerald-300 text-xs px-1.5 py-0.5 rounded font-mono border border-[#333]">$1</code>')
+          .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" class="text-emerald-400 font-semibold underline hover:text-emerald-300">$1</a>');
+      };
+
+      if (trimmed.startsWith("### ")) {
+        return `<h3 class="text-lg font-bold text-white mt-4 mb-2">${formatInline(trimmed.slice(4))}</h3>`;
+      }
+      if (trimmed.startsWith("## ")) {
+        return `<h2 class="text-xl font-bold text-emerald-400 mt-5 mb-2">${formatInline(trimmed.slice(3))}</h2>`;
+      }
+      if (trimmed.startsWith("# ")) {
+        return `<h1 class="text-2xl font-serif font-bold text-white mt-6 mb-3">${formatInline(trimmed.slice(2))}</h1>`;
+      }
+      if (trimmed.startsWith("> ")) {
+        return `<blockquote class="border-l-4 border-emerald-500 pl-4 py-1.5 my-3 italic text-gray-300 bg-[#161616] rounded-r">${formatInline(trimmed.slice(2))}</blockquote>`;
+      }
+      if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+        return `<li class="ml-4 list-disc text-gray-300 my-1">${formatInline(trimmed.slice(2))}</li>`;
+      }
+      if (/^\d+\.\s/.test(trimmed)) {
+        return `<li class="ml-4 list-decimal text-gray-300 my-1">${formatInline(trimmed.replace(/^\d+\.\s/, ''))}</li>`;
+      }
+
+      return `<p class="my-2.5 text-gray-300 text-base leading-relaxed">${formatInline(trimmed)}</p>`;
+    });
+
+    return htmlLines.join("");
   };
 
   // Save Blog (Insert or Update)
@@ -289,18 +314,17 @@ export default function BlogsPage() {
     try {
       let finalImageUrl = imagePreview?.src || "";
 
-      // If new image was compressed, upload to Supabase storage or convert to Base64
+      // If new image was converted to WebP, upload to Supabase storage or convert to WebP Data URL
       if (imagePreview && imagePreview.type === "new" && imagePreview.file) {
         const file = imagePreview.file;
-        const fileExt = file.name.split('.').pop() || 'jpg';
-        const fileName = `blog_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const fileName = `blog_${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
 
         // Attempt upload to Supabase storage 'products' or 'blogs' bucket
         let uploadSuccess = false;
         try {
           const { error: uploadError } = await supabase.storage
             .from("products")
-            .upload(fileName, file, { contentType: "image/jpeg" });
+            .upload(fileName, file, { contentType: "image/webp", upsert: true });
 
           if (!uploadError) {
             const { data: { publicUrl } } = supabase.storage
@@ -313,7 +337,7 @@ export default function BlogsPage() {
           console.warn("Storage upload fallback:", storageErr);
         }
 
-        // Fallback: convert ~40KB compressed image to Data URL if storage bucket is not configured
+        // Fallback: convert ~40KB WebP image to Data URL if storage bucket is not configured
         if (!uploadSuccess) {
           finalImageUrl = await new Promise<string>((resolve) => {
             const reader = new FileReader();

@@ -169,7 +169,7 @@ export function Sidebar() {
           >
             <Menu className="h-6 w-6" />
           </button>
-          <span className="text-lg font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+          <span className="text-lg font-bold bg-gradient-to-r from-emerald-400 via-emerald-300 to-amber-400 bg-clip-text text-transparent">
             Heaven Home Admin
           </span>
         </div>

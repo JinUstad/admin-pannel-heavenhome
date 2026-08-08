@@ -28,6 +28,7 @@ import {
   Sparkles
 } from "lucide-react";
 import imageCompression from "browser-image-compression";
+import { convertToWebP } from "@/lib/imageWebp";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -162,20 +163,46 @@ export default function ProductsPage() {
       return "<p class='text-gray-500 italic'>No description entered yet. Write product details, key features, material, specifications...</p>";
     }
 
-    let formatted = text
-      .replace(/^### (.*$)/gim, '<h3 class="text-base font-bold text-white mt-4 mb-1.5">$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-lg font-bold text-emerald-400 mt-5 mb-2">$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1 class="text-xl font-bold text-white mt-5 mb-2">$1</h1>')
-      .replace(/\*\*(.*?)\*\*/gim, '<strong class="font-bold text-white">$1</strong>')
-      .replace(/\*(.*?)\*/gim, '<em class="italic text-gray-300">$1</em>')
-      .replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-emerald-500 pl-3 py-1 my-2 italic text-gray-300 bg-[#161616] rounded-r">$1</blockquote>')
-      .replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2" target="_blank" class="text-emerald-400 underline hover:text-emerald-300">$1</a>')
-      .replace(/^\- (.*$)/gim, '<li class="ml-4 list-disc text-gray-300 my-1">$1</li>')
-      .replace(/^\d+\. (.*$)/gim, '<li class="ml-4 list-decimal text-gray-300 my-1">$1</li>')
-      .replace(/\n\n/gim, '</p><p class="my-2.5 text-gray-300 leading-relaxed">')
-      .replace(/\n/gim, '<br/>');
+    const lines = text.split("\n");
+    const htmlLines = lines.map((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return "<div class='h-2'></div>";
 
-    return `<p class="my-2 text-gray-300 leading-relaxed">${formatted}</p>`;
+      // Inline formatter
+      const formatInline = (str: string) => {
+        return str
+          .replace(/\*\*\*(.*?)\*\*\*/g, '<strong class="font-bold text-white"><em class="italic text-gray-200">$1</em></strong>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1</strong>')
+          .replace(/__(.*?)__/g, '<strong class="font-bold text-white">$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em class="italic text-gray-300">$1</em>')
+          .replace(/_(.*?)_/g, '<em class="italic text-gray-300">$1</em>')
+          .replace(/`([^`]+)`/g, '<code class="bg-[#262626] text-emerald-300 text-xs px-1.5 py-0.5 rounded font-mono border border-[#333]">$1</code>')
+          .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" class="text-emerald-400 font-semibold underline hover:text-emerald-300">$1</a>');
+      };
+
+      if (trimmed.startsWith("### ")) {
+        return `<h3 class="text-base font-bold text-white mt-4 mb-1">${formatInline(trimmed.slice(4))}</h3>`;
+      }
+      if (trimmed.startsWith("## ")) {
+        return `<h2 class="text-lg font-bold text-emerald-400 mt-5 mb-2">${formatInline(trimmed.slice(3))}</h2>`;
+      }
+      if (trimmed.startsWith("# ")) {
+        return `<h1 class="text-xl font-bold text-white mt-5 mb-2">${formatInline(trimmed.slice(2))}</h1>`;
+      }
+      if (trimmed.startsWith("> ")) {
+        return `<blockquote class="border-l-4 border-emerald-500 pl-3 py-1.5 my-2.5 italic text-gray-300 bg-[#161616] rounded-r text-sm">${formatInline(trimmed.slice(2))}</blockquote>`;
+      }
+      if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+        return `<li class="ml-4 list-disc text-gray-300 my-1 text-sm">${formatInline(trimmed.slice(2))}</li>`;
+      }
+      if (/^\d+\.\s/.test(trimmed)) {
+        return `<li class="ml-4 list-decimal text-gray-300 my-1 text-sm">${formatInline(trimmed.replace(/^\d+\.\s/, ''))}</li>`;
+      }
+
+      return `<p class="my-1.5 text-gray-300 text-sm leading-relaxed">${formatInline(trimmed)}</p>`;
+    });
+
+    return htmlLines.join("");
   };
 
   const calculateDiscountBadge = (actualPrice: string, mrpPrice: string, customDisc: string) => {
@@ -204,19 +231,21 @@ export default function ProductsPage() {
         finalUrls.push(item.src);
       } else if (item.type === "new" && item.file) {
         try {
-          const options = {
+          // Convert and compress strictly to WebP
+          const webpFile = await convertToWebP(item.file, {
             maxSizeMB: 0.08,
             maxWidthOrHeight: 1200,
-            useWebWorker: true,
-          };
-          const compressedFile = await imageCompression(item.file, options);
+            quality: 0.85
+          });
 
-          const fileExt = compressedFile.name.split('.').pop() || 'jpg';
-          const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+          const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
 
           const { error: uploadError } = await supabase.storage
             .from("products")
-            .upload(fileName, compressedFile);
+            .upload(fileName, webpFile, {
+              contentType: "image/webp",
+              upsert: true
+            });
 
           if (uploadError) throw uploadError;
 
@@ -226,7 +255,7 @@ export default function ProductsPage() {
 
           finalUrls.push(publicUrl);
         } catch (err: any) {
-          alert("Error uploading image: " + err.message);
+          alert("Error uploading WebP image: " + err.message);
           setLoading(false);
           return;
         }

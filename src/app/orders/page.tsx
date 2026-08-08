@@ -385,7 +385,7 @@ export default function OrdersPage() {
       </div>
 
       {/* TABS NAVIGATION */}
-      <div className="flex items-center gap-2 border-b border-[#262626] pb-2">
+      <div className="flex items-center gap-2 border-b border-[#262626] pb-2 overflow-x-auto scrollbar-none">
         <button
           onClick={() => { setActiveTab("all"); setCurrentPage(1); }}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
