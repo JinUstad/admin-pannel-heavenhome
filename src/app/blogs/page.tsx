@@ -67,7 +67,7 @@ export default function BlogsPage() {
 
   // Form State
   const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("Heaven Home Team");
+  const [author, setAuthor] = useState("Heaven Jewels Team");
   const [category, setCategory] = useState("Kitchen Essentials");
   const [customCategory, setCustomCategory] = useState("");
   const [publishedAt, setPublishedAt] = useState("");
@@ -123,7 +123,7 @@ export default function BlogsPage() {
   const openCreateModal = () => {
     setEditingBlog(null);
     setTitle("");
-    setAuthor("Heaven Home Team");
+    setAuthor("Heaven Jewels Team");
     setCategory("Kitchen Essentials");
     setCustomCategory("");
     setPublishedAt(getNowDateTimeString()); // Auto selected current date & time
@@ -137,7 +137,7 @@ export default function BlogsPage() {
   const openEditModal = (blog: Blog) => {
     setEditingBlog(blog);
     setTitle(blog.title || "");
-    setAuthor(blog.author || "Heaven Home Team");
+    setAuthor(blog.author || "Heaven Jewels Team");
     
     if (DEFAULT_CATEGORIES.includes(blog.category)) {
       setCategory(blog.category);
@@ -371,7 +371,7 @@ export default function BlogsPage() {
       const blogPayload = {
         title: title.trim(),
         slug: editingBlog?.slug || slug,
-        author: author.trim() || "Heaven Home Team",
+        author: author.trim() || "Heaven Jewels Team",
         category: finalCategory || "Kitchen Essentials",
         excerpt: generatedExcerpt,
         content: content.trim(),
@@ -570,7 +570,7 @@ export default function BlogsPage() {
                     <td className="py-4 px-6 text-gray-300">
                       <div className="flex items-center gap-1.5">
                         <User className="h-3.5 w-3.5 text-gray-500" />
-                        <span>{blog.author || "Heaven Home Team"}</span>
+                        <span>{blog.author || "Heaven Jewels Team"}</span>
                       </div>
                     </td>
                     <td className="py-4 px-6 text-gray-400 text-xs">
@@ -694,7 +694,7 @@ export default function BlogsPage() {
                   </label>
                   <input
                     type="text"
-                    placeholder="Heaven Home Team"
+                    placeholder="Heaven Jewels Team"
                     value={author}
                     onChange={(e) => setAuthor(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-[#181818] border border-[#262626] rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors"

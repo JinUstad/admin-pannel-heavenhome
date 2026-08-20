@@ -11,12 +11,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Heaven Home Admin",
-  description: "Admin dashboard for Heaven Home",
+  title: "Heaven Jewels Admin",
+  description: "Admin dashboard for Heaven Jewels",
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
-    apple: "/logo.png",
+    icon: "/heavenjewels.PNG",
+    shortcut: "/heavenjewels.PNG",
+    apple: "/heavenjewels.PNG",
   },
 };
 

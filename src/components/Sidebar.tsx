@@ -60,7 +60,7 @@ export function Sidebar() {
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 border-b border-[#262626]">
         {!collapsed && (
           <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-400 via-emerald-300 to-amber-400 bg-clip-text text-transparent truncate">
-            Heaven Home
+            Heaven Jewels
           </h1>
         )}
         {collapsed && (
@@ -170,7 +170,7 @@ export function Sidebar() {
             <Menu className="h-6 w-6" />
           </button>
           <span className="text-lg font-bold bg-gradient-to-r from-emerald-400 via-emerald-300 to-amber-400 bg-clip-text text-transparent">
-            Heaven Home Admin
+            Heaven Jewels Admin
           </span>
         </div>
       </div>

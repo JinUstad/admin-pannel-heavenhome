@@ -72,7 +72,7 @@ export default function LoginPage() {
               <ShieldCheck className="h-6 w-6 text-emerald-400" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Heaven Home Admin</h1>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Heaven Jewels Admin</h1>
           <p className="text-gray-400 text-xs mt-1 text-center">
             Enter your admin credentials to access the management dashboard
           </p>
